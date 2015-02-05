@@ -2,7 +2,7 @@
  Comp 394 Spring '15 Assignment #1 Text Rain
  **/
 
-
+// text font size is 16
 import processing.video.*;
 import java.util.Random;
 import java.lang.String;
@@ -16,7 +16,7 @@ PImage inputImage;
 PImage thresholdImage;
 boolean inputMethodSelected = false;
 PFont f;
-Random rand = new Random();
+
 
 int dimension;
 int[] thresholdPixels;
@@ -26,16 +26,19 @@ int threshold = 128;
 boolean debugging = false;
 int i;
 int r, g, b, pix;
+int xPos;
 String method = "luminosity";
 
 Letter[] l;
 
 void setup() {
   size(1280, 720);  
+  Random rand = new Random();
   inputImage = createImage(width, height, RGB);
   l = new Letter[15];
   for (int i = 0; i < l.length; i++) {
-    l[i] = new Letter("t", i * 70, 10, 0, millis());
+    xPos = rand.nextInt(width + 1);
+    l[i] = new Letter("t", xPos, 10, 0, millis(), threshold);
   }
 }
 
@@ -152,11 +155,7 @@ void keyPressed() {
       if (threshold > 0) threshold -= 5;
     }
   } else if (key == ' ') {
-    if (debugging) {
-      debugging = false;
-    } else {
-      debugging = true;
-    }
+    debugging = !debugging;
   } else if (key == 'a') {
     method = "average";
   } else if (key == 'l') {
@@ -172,13 +171,15 @@ class Letter {
   int y;
   float currSpeed;
   int startTime;
+  int threshold;
 
-  Letter(String s, int tempX, int tempY, float initSpeed, int time) {
+  Letter(String s, int tempX, int tempY, float initSpeed, int time, int threshold) {
     character = s;
-    x = tempX;
-    y = tempY;
-    currSpeed = initSpeed;
-    startTime = time;
+    this.x = tempX;
+    this.y = tempY;
+    this.currSpeed = initSpeed;
+    this.startTime = time;
+    this.threshold = threshold;
   }
 
   void place() {
@@ -187,8 +188,25 @@ class Letter {
   
   void updateY() {
     int time = (millis() - startTime) / 1000;
-//    y += 5;
-    y += Math.round(0.5 * 2.4 * time * time);
+    int i = (((this.y + 16 + 5) * inputImage.width) + (this.x));
+    if (i <= inputImage.pixels.length){
+      int pix = inputImage.pixels[i];
+      r = (pix >> 16) & 0xFF;
+      g = (pix >> 8) & 0xFF;
+      b = pix & 0xFF;
+      if (convert(r, g, b) >= threshold){
+        this.y += Math.round(0.5 * 0.05 * time * time);
+      }
+      else {
+        int pix2 = inputImage.pixels[(this.y * inputImage.width) + (this.x)];
+        r = (pix2 >> 16) & 0xFF;
+        g = (pix2 >> 8) & 0xFF;
+        b = pix2 & 0xFF;
+        if (convert(r, g, b) >= threshold){
+          this.y -= Math.round(0.5 * 0.05 * time * time);
+        }
+      }
+    }      
   }
 }
 
