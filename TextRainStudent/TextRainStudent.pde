@@ -36,11 +36,6 @@ void setup() {
   size(1280, 720);  
   Random rand = new Random();
   inputImage = createImage(width, height, RGB);
-//  l = new Letter[15];
-//  for (int i = 0; i < l.length; i++) {
-//    xPos = rand.nextInt(width + 1);
-//    l[i] = new Letter("a", xPos, 10, 0, millis(), threshold);
-//  }
   letters = new ArrayList<Letter>();
   tg = new TextGenerator("ran1.txt");
 }
