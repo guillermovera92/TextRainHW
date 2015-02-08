@@ -81,7 +81,9 @@ void draw() {
     for  (int x = 0; x < inputImage.width; x++) {
       i = ((y * inputImage.width) + (x));
       if (i % inputImage.width < floor(inputImage.width / 2)) {
-        reverseImage(x, y, i);
+        temp = inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x];
+        inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x] = inputImage.pixels[i];
+        inputImage.pixels[i] = temp;
       }
       pix = inputImage.pixels[i];
       r = (pix >> 16) & 0xFF;
@@ -122,12 +124,6 @@ int convert(int r, int g, int b) {
   } else {
     return (max(r, g, b) + min(r, g, b)) / 2;
   }
-}
-
-void reverseImage(int x, int y, int i) {
-  temp = inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x];
-  inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x] = inputImage.pixels[i];
-  inputImage.pixels[i] = temp;
 }
 
 
@@ -198,21 +194,23 @@ class Letter {
     int time = (millis() - startTime) / 1000;
     int i = ((this.y + 16 + 5) * inputImage.width) + this.x;
     if (i < inputImage.pixels.length) {
-      int pix = inputImage.pixels[i -1];
+      int pix = inputImage.pixels[i];
       r = (pix >> 16) & 0xFF;
       g = (pix >> 8) & 0xFF;
       b = pix & 0xFF;
       if (convert(r, g, b) >= threshold) {
-        this.y += Math.round(5);
-      } else {
-        int i2;
-        i2 = (this.y * inputImage.width) + this.x;
-        int pix2 = inputImage.pixels[i2 - 1];
+        this.y += Math.round(0.5 * 0.1 * time * time);
+      } 
+      
+      else {
+        int i2 = (this.y * inputImage.width) + this.x;
+        int pix2 = inputImage.pixels[i2];
         r = (pix2 >> 16) & 0xFF;
         g = (pix2 >> 8) & 0xFF;
         b = pix2 & 0xFF;
-        if (convert(r, g, b) >= threshold && this.y > 5) {
-          this.y -= Math.round(5);
+        int dy = Math.round(0.5 * 0.1 * time * time);
+        if (convert(r, g, b) <= threshold && this.y > dy) {
+          this.y -= dy;
         }
       }
     }
