@@ -25,7 +25,7 @@ int threshold = 128;
 
 boolean debugging = false;
 int i;
-int r, g, b, pix;
+int r, g, b, pix, temp;
 int xPos;
 String method = "luminosity";
 
@@ -38,7 +38,7 @@ void setup() {
   l = new Letter[15];
   for (int i = 0; i < l.length; i++) {
     xPos = rand.nextInt(width + 1);
-    l[i] = new Letter("t", xPos, 10, 0, millis(), threshold);
+    l[i] = new Letter("a", xPos, 10, 0, millis(), threshold);
   }
 }
 
@@ -79,9 +79,15 @@ void draw() {
 
 
   loadPixels();  
-  for (int x = 0; x < inputImage.width; x++) {
-    for  (int y = 0; y < inputImage.height; y++) {
+  for (int y = 0; y < inputImage.height; y++) {
+    for  (int x = 0; x < inputImage.width; x++) {
       i = ((y * inputImage.width) + (x));
+      if (i % inputImage.width < floor(inputImage.width / 2)) {
+         temp = inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x];
+         inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x] = inputImage.pixels[i];
+         inputImage.pixels[i] = temp;
+      }
+      //i = ((y * inputImage.width) + (x));
       pix = inputImage.pixels[i];
       r = (pix >> 16) & 0xFF;
       g = (pix >> 8) & 0xFF;
@@ -97,7 +103,6 @@ void draw() {
     }
   }
   updatePixels();
-
 
   // Tip: This code draws the current input image to the screen
   set(0, 0, inputImage);
