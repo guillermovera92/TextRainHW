@@ -86,10 +86,7 @@ void draw() {
         inputImage.pixels[i] = temp;
       }
       pix = inputImage.pixels[i];
-      r = (pix >> 16) & 0xFF;
-      g = (pix >> 8) & 0xFF;
-      b = pix & 0xFF;
-      if (convert(r, g, b) >= threshold) {
+      if (greyscale(pix) >= threshold) {
         thresholdPixels[i] = color(255);
       } else {
         thresholdPixels[i] = color(0);
@@ -107,7 +104,7 @@ void draw() {
   textFont(f, 16);
   textAlign(CENTER);
   fill(0); 
-  if (Math.random() < 0.2){
+  if (Math.random() < 0.2) {
     letters.add(new Letter(tg.getNextLetter(), 10, millis(), threshold));
   }
   for (Letter let : letters) {
@@ -124,6 +121,20 @@ int convert(int r, int g, int b) {
   } else {
     return (max(r, g, b) + min(r, g, b)) / 2;
   }
+}
+
+
+int greyscale(int pixel) {
+  r = (pixel >> 16) & 0xFF;
+  g = (pixel >> 8) & 0xFF;
+  b = pixel & 0xFF;
+  return convert(r, g, b);
+}
+
+void reverseImage(int x, int y, int i) {
+  temp = inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x];
+  inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x] = inputImage.pixels[i];
+  inputImage.pixels[i] = temp;
 }
 
 
@@ -187,31 +198,26 @@ class Letter {
 
   void place() {
     text(character, x, y);
-    fill(0,102 , 153, 50);
+    fill(0, 0, 102, 204);
   }
 
   void updateY() {
     int time = (millis() - startTime) / 1000;
-    int i = ((this.y + 16 + 5) * inputImage.width) + this.x;
+    int i = ((this.y + 16 + 3) * inputImage.width) + this.x;
     if (i < inputImage.pixels.length) {
       int pix = inputImage.pixels[i];
-      r = (pix >> 16) & 0xFF;
-      g = (pix >> 8) & 0xFF;
-      b = pix & 0xFF;
-      if (convert(r, g, b) >= threshold) {
-        this.y += Math.round(0.5 * 0.1 * time * time);
-      } 
-      
-      else {
+      if (greyscale(pix) >= threshold) {
+        this.y += Math.round(0.5 * time * time);
+      } else {
         int i2 = (this.y * inputImage.width) + this.x;
         int pix2 = inputImage.pixels[i2];
-        r = (pix2 >> 16) & 0xFF;
-        g = (pix2 >> 8) & 0xFF;
-        b = pix2 & 0xFF;
-        int dy = Math.round(0.5 * 0.1 * time * time);
-        if (convert(r, g, b) <= threshold && this.y > dy) {
-          this.y -= dy;
+        //        int dy = Math.round(0.5 * 0.1 * time * time);
+        while (greyscale (pix2) <= threshold && this.y > 1) {
+          this.y -= 1;
+          i2 = (this.y * inputImage.width) + this.x;
+          pix2 = inputImage.pixels[i2];
         }
+        startTime = millis();
       }
     }
   }
