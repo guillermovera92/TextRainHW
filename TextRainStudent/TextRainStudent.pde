@@ -36,11 +36,6 @@ void setup() {
   size(1280, 720);  
   Random rand = new Random();
   inputImage = createImage(width, height, RGB);
-//  l = new Letter[15];
-//  for (int i = 0; i < l.length; i++) {
-//    xPos = rand.nextInt(width + 1);
-//    l[i] = new Letter("a", xPos, 10, 0, millis(), threshold);
-//  }
   letters = new ArrayList<Letter>();
   tg = new TextGenerator("ran1.txt");
 }
@@ -111,7 +106,7 @@ void draw() {
   textAlign(CENTER);
   fill(0); 
   if (Math.random() < 0.2){
-    letters.add(new Letter(tg.getNextLetter(), 10, 0, millis(), threshold));
+    letters.add(new Letter(tg.getNextLetter(), 10, millis(), threshold));
   }
   for (Letter let : letters) {
     let.place();
@@ -183,40 +178,41 @@ class Letter {
   String character;
   int x;
   int y;
-  float currSpeed;
   int startTime;
   int threshold;
 
-  Letter(String s, int tempY, float initSpeed, int time, int threshold) {
+  Letter(String s, int tempY, int time, int threshold) {
     character = s;
     this.x = rand.nextInt(width);
     this.y = tempY;
-    this.currSpeed = initSpeed;
     this.startTime = time;
     this.threshold = threshold;
   }
 
   void place() {
     text(character, x, y);
+    fill(0,102 , 153, 50);
   }
 
   void updateY() {
     int time = (millis() - startTime) / 1000;
-    int i = (((this.y + 16 + 5) * inputImage.width) + (this.x));
-    if (i <= inputImage.pixels.length) {
-      int pix = inputImage.pixels[i];
+    int i = ((this.y + 16 + 5) * inputImage.width) + this.x;
+    if (i < inputImage.pixels.length) {
+      int pix = inputImage.pixels[i -1];
       r = (pix >> 16) & 0xFF;
       g = (pix >> 8) & 0xFF;
       b = pix & 0xFF;
       if (convert(r, g, b) >= threshold) {
-        this.y += Math.round(0.5 * 0.05 * time * time);
+        this.y += Math.round(5);
       } else {
-        int pix2 = inputImage.pixels[(this.y * inputImage.width) + (this.x)];
+        int i2;
+        i2 = (this.y * inputImage.width) + this.x;
+        int pix2 = inputImage.pixels[i2 - 1];
         r = (pix2 >> 16) & 0xFF;
         g = (pix2 >> 8) & 0xFF;
         b = pix2 & 0xFF;
-        if (convert(r, g, b) >= threshold) {
-          this.y -= Math.round(0.5 * 0.05 * time * time);
+        if (convert(r, g, b) >= threshold && this.y > 5) {
+          this.y -= Math.round(5);
         }
       }
     }
