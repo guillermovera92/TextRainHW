@@ -17,7 +17,6 @@ PImage thresholdImage;
 boolean inputMethodSelected = false;
 PFont f;
 
-
 int dimension;
 int[] thresholdPixels;
 boolean thresholdDefined;
@@ -28,18 +27,22 @@ int i;
 int r, g, b, pix, temp;
 int xPos;
 String method = "luminosity";
+TextGenerator tg;
 
-Letter[] l;
+ArrayList<Letter> letters;
+Random rand = new Random();
 
 void setup() {
   size(1280, 720);  
   Random rand = new Random();
   inputImage = createImage(width, height, RGB);
-  l = new Letter[15];
-  for (int i = 0; i < l.length; i++) {
-    xPos = rand.nextInt(width + 1);
-    l[i] = new Letter("a", xPos, 10, 0, millis(), threshold);
-  }
+//  l = new Letter[15];
+//  for (int i = 0; i < l.length; i++) {
+//    xPos = rand.nextInt(width + 1);
+//    l[i] = new Letter("a", xPos, 10, 0, millis(), threshold);
+//  }
+  letters = new ArrayList<Letter>();
+  tg = new TextGenerator("ran1.txt");
 }
 
 
@@ -83,11 +86,8 @@ void draw() {
     for  (int x = 0; x < inputImage.width; x++) {
       i = ((y * inputImage.width) + (x));
       if (i % inputImage.width < floor(inputImage.width / 2)) {
-         temp = inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x];
-         inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x] = inputImage.pixels[i];
-         inputImage.pixels[i] = temp;
+        reverseImage(x, y, i);
       }
-      //i = ((y * inputImage.width) + (x));
       pix = inputImage.pixels[i];
       r = (pix >> 16) & 0xFF;
       g = (pix >> 8) & 0xFF;
@@ -110,9 +110,12 @@ void draw() {
   textFont(f, 16);
   textAlign(CENTER);
   fill(0); 
-  for(Letter let : l) {
-   let.place(); 
-   let.updateY();
+  if (Math.random() < 0.2){
+    letters.add(new Letter(tg.getNextLetter(), 10, 0, millis(), threshold));
+  }
+  for (Letter let : letters) {
+    let.place();
+    let.updateY();
   }
 }
 
@@ -124,6 +127,12 @@ int convert(int r, int g, int b) {
   } else {
     return (max(r, g, b) + min(r, g, b)) / 2;
   }
+}
+
+void reverseImage(int x, int y, int i) {
+  temp = inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x];
+  inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x] = inputImage.pixels[i];
+  inputImage.pixels[i] = temp;
 }
 
 
@@ -178,9 +187,9 @@ class Letter {
   int startTime;
   int threshold;
 
-  Letter(String s, int tempX, int tempY, float initSpeed, int time, int threshold) {
+  Letter(String s, int tempY, float initSpeed, int time, int threshold) {
     character = s;
-    this.x = tempX;
+    this.x = rand.nextInt(width);
     this.y = tempY;
     this.currSpeed = initSpeed;
     this.startTime = time;
@@ -190,28 +199,27 @@ class Letter {
   void place() {
     text(character, x, y);
   }
-  
+
   void updateY() {
     int time = (millis() - startTime) / 1000;
     int i = (((this.y + 16 + 5) * inputImage.width) + (this.x));
-    if (i <= inputImage.pixels.length){
+    if (i <= inputImage.pixels.length) {
       int pix = inputImage.pixels[i];
       r = (pix >> 16) & 0xFF;
       g = (pix >> 8) & 0xFF;
       b = pix & 0xFF;
-      if (convert(r, g, b) >= threshold){
+      if (convert(r, g, b) >= threshold) {
         this.y += Math.round(0.5 * 0.05 * time * time);
-      }
-      else {
+      } else {
         int pix2 = inputImage.pixels[(this.y * inputImage.width) + (this.x)];
         r = (pix2 >> 16) & 0xFF;
         g = (pix2 >> 8) & 0xFF;
         b = pix2 & 0xFF;
-        if (convert(r, g, b) >= threshold){
+        if (convert(r, g, b) >= threshold) {
           this.y -= Math.round(0.5 * 0.05 * time * time);
         }
       }
-    }      
+    }
   }
 }
 
