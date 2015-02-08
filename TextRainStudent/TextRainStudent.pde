@@ -23,6 +23,7 @@ boolean thresholdDefined;
 int threshold = 128;
 
 boolean debugging = false;
+boolean flip;
 int i;
 int r, g, b, pix, temp;
 int xPos;
@@ -65,9 +66,11 @@ void draw() {
   if ((cam != null) && (cam.available())) {
     cam.read();
     inputImage.copy(cam, 0, 0, cam.width, cam.height, 0, 0, inputImage.width, inputImage.height);
+    flip = true;
   } else if ((mov != null) && (mov.available())) {
     mov.read();
     inputImage.copy(mov, 0, 0, mov.width, mov.height, 0, 0, inputImage.width, inputImage.height);
+    flip = true;
   }
 
   if (!thresholdDefined) {
@@ -80,7 +83,7 @@ void draw() {
   for (int y = 0; y < inputImage.height; y++) {
     for  (int x = 0; x < inputImage.width; x++) {
       i = ((y * inputImage.width) + (x));
-      if (i % inputImage.width < floor(inputImage.width / 2)) {
+      if (i % inputImage.width < floor(inputImage.width / 2) && flip) {
         temp = inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x];
         inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x] = inputImage.pixels[i];
         inputImage.pixels[i] = temp;
@@ -111,6 +114,7 @@ void draw() {
     let.place();
     let.updateY();
   }
+  flip = false ;
 }
 
 int convert(int r, int g, int b) {
