@@ -38,7 +38,7 @@ void setup() {
   Random rand = new Random();
   inputImage = createImage(width, height, RGB);
   letters = new ArrayList<Letter>();
-  tg = new TextGenerator("ran1.txt");
+  tg = new TextGenerator("wordsEn.txt");
 }
 
 
@@ -84,9 +84,7 @@ void draw() {
     for  (int x = 0; x < inputImage.width; x++) {
       i = ((y * inputImage.width) + (x));
       if (i % inputImage.width < floor(inputImage.width / 2) && flip) {
-        temp = inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x];
-        inputImage.pixels[y * inputImage.width + inputImage.width - 1 - x] = inputImage.pixels[i];
-        inputImage.pixels[i] = temp;
+        reverseImage(x, y, i);
       }
       pix = inputImage.pixels[i];
       if (greyscale(pix) >= threshold) {
@@ -108,7 +106,7 @@ void draw() {
   textAlign(CENTER);
   fill(0); 
   if (Math.random() < 0.2) {
-    letters.add(new Letter(tg.getNextLetter(), 10, millis(), threshold));
+    letters.add(new Letter(tg.getNextLetter(), 10, millis(), threshold, width));
   }
   for (Letter let : letters) {
     let.place();
@@ -191,17 +189,18 @@ class Letter {
   int y;
   int startTime;
   int threshold;
+  int maxY;
 
-  Letter(String s, int tempY, int time, int threshold) {
+  Letter(String s, int tempY, int time, int threshold, int maxY) {
     character = s;
-    this.x = rand.nextInt(width);
+    this.x = rand.nextInt(maxY);
     this.y = tempY;
     this.startTime = time;
     this.threshold = threshold;
   }
 
   void place() {
-    text(character, x, y);
+    text(character, this.x, this.y);
     fill(0, 0, 102, 204);
   }
 

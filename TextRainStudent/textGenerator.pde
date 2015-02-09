@@ -7,28 +7,31 @@ class TextGenerator {
   String currentLine;  
   String letter;
   int randPos;
+  String path;
 
   BufferedReader reader;
   Random rand = new Random();
 
   TextGenerator(String path) {
-      reader = createReader(path);
+    this.path = path;
+    reader = createReader(path);
   }
 
   String getNextLetter() {
-    if (currentLine == null) {
+    if (currentLine == null || currentLine.length() == 0) {
       try {
         currentLine = reader.readLine().replaceAll("[^a-zA-Z]", "").toUpperCase();
+        if (currentLine == null) {
+          reader = createReader(path);
+        }
       } 
       catch (IOException e) {
         e.printStackTrace();
       }
-    }
-    if (currentLine != null) {
-      randPos = rand.nextInt(1);//currentLine.length());
-      letter = currentLine.substring(randPos, randPos + 1);
-      currentLine = currentLine.substring(0, randPos) + currentLine.substring(randPos + 1);
-    }
+    } 
+    randPos = rand.nextInt(currentLine.length());
+    letter = currentLine.charAt(randPos) + "";
+    currentLine = currentLine.substring(0, randPos) + currentLine.substring(randPos + 1);
     return letter;
   }
 }
