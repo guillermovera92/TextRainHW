@@ -23,6 +23,7 @@ boolean thresholdDefined;
 int threshold = 128;
 
 boolean debugging = false;
+boolean smoothing = false;
 boolean flip;
 int i;
 int r, g, b, pix, temp;
@@ -78,6 +79,9 @@ void draw() {
     thresholdPixels = new int[dimension];
   }
 
+  if (smoothing) {
+    smooth();
+  }
 
   loadPixels();  
   for (int y = 0; y < inputImage.height; y++) {
@@ -162,10 +166,6 @@ void keyPressed() {
     return;
   }
 
-
-  // This part of the keyPressed routine gets called after the input selection screen during normal execution of the program
-  // Fill in your code to handle keypresses here..
-
   if (key == CODED) {
     if (keyCode == UP) {
       if (threshold < 255) threshold += 5;
@@ -180,6 +180,8 @@ void keyPressed() {
     method = "luminosity";
   } else if (key == 'g') {
     method = "lightness";
+  } else if (key == 's') {
+    smoothing = !smoothing;
   }
 }
 
